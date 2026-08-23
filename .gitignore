@@ -1,0 +1,6 @@
+.buildozer/
+bin/
+core/
+output/
+__pycache__/
+*.pyc

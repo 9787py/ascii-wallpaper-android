@@ -1,0 +1,123 @@
+#:kivy 2.3.0
+
+<Label>:
+    font_name: app.ui_font
+
+<Button>:
+    font_name: app.ui_font
+
+<Spinner>:
+    font_name: app.ui_font
+
+<TextInput>:
+    font_name: app.ui_font
+
+<MainView>:
+    orientation: "vertical"
+    padding: "12dp"
+    spacing: "8dp"
+
+    Label:
+        text: "ASCII 壁纸生成器（Android 原型）"
+        size_hint_y: None
+        height: "42dp"
+        font_size: "20sp"
+
+    Image:
+        id: preview
+        source: root.preview_path
+        allow_stretch: True
+        keep_ratio: True
+
+    Label:
+        text: root.source_path if root.source_path else "尚未选择图片"
+        text_size: self.width, None
+        shorten: True
+        shorten_from: "left"
+        size_hint_y: None
+        height: "28dp"
+
+    GridLayout:
+        cols: 2
+        spacing: "6dp"
+        size_hint_y: None
+        height: self.minimum_height
+        row_default_height: "42dp"
+        row_force_default: True
+
+        Label:
+            text: "渲染算法"
+        Spinner:
+            id: mode
+            text: "自动推荐"
+            values: root.mode_labels
+
+        Label:
+            text: "图片适配"
+        Spinner:
+            id: fit
+            text: "自动"
+            values: root.fit_labels
+
+        Label:
+            text: "输出尺寸"
+        TextInput:
+            id: output_size
+            text: "1080x1920"
+            multiline: False
+            input_filter: lambda text, from_undo: ''.join(c for c in text if c in '0123456789xX')
+
+        Label:
+            text: "字体大小"
+        TextInput:
+            id: font_size
+            text: "18"
+            multiline: False
+            input_filter: "int"
+
+        Label:
+            text: "手动背景色"
+        TextInput:
+            id: background
+            text: "black"
+            multiline: False
+
+        Label:
+            text: "自动背景"
+        CheckBox:
+            id: auto_background
+            active: True
+
+        Label:
+            text: "误差扩散"
+        CheckBox:
+            id: dither
+            active: False
+
+    Label:
+        text: root.status
+        text_size: self.width, None
+        halign: "left"
+        valign: "middle"
+        size_hint_y: None
+        height: max(dp(44), self.texture_size[1] + dp(12))
+
+    BoxLayout:
+        size_hint_y: None
+        height: "48dp"
+        spacing: "8dp"
+
+        Button:
+            text: "选择图片"
+            disabled: root.busy
+            on_release: root.choose_source()
+
+        Button:
+            text: "生成预览"
+            disabled: root.busy
+            on_release: root.generate()
+
+        Button:
+            text: "设为壁纸"
+            disabled: root.busy or not root.preview_path
+            on_release: root.apply_wallpaper()
