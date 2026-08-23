@@ -23,84 +23,95 @@
         height: "42dp"
         font_size: "20sp"
 
-    Image:
-        id: preview
-        source: root.preview_path
-        allow_stretch: True
-        keep_ratio: True
+    ScrollView:
+        do_scroll_x: False
 
-    Label:
-        text: root.source_path if root.source_path else "尚未选择图片"
-        text_size: self.width, None
-        shorten: True
-        shorten_from: "left"
-        size_hint_y: None
-        height: "28dp"
+        BoxLayout:
+            orientation: "vertical"
+            spacing: "8dp"
+            size_hint_y: None
+            height: self.minimum_height
 
-    GridLayout:
-        cols: 2
-        spacing: "6dp"
-        size_hint_y: None
-        height: self.minimum_height
-        row_default_height: "42dp"
-        row_force_default: True
+            Image:
+                id: preview
+                source: root.preview_path
+                allow_stretch: True
+                keep_ratio: True
+                size_hint_y: None
+                height: max(dp(220), self.texture_size[1] if self.texture_size else dp(220))
 
-        Label:
-            text: "渲染算法"
-        Spinner:
-            id: mode
-            text: "自动推荐"
-            values: root.mode_labels
+            Label:
+                text: root.source_path if root.source_path else "尚未选择图片"
+                text_size: self.width, None
+                shorten: True
+                shorten_from: "left"
+                size_hint_y: None
+                height: "28dp"
 
-        Label:
-            text: "图片适配"
-        Spinner:
-            id: fit
-            text: "自动"
-            values: root.fit_labels
+            GridLayout:
+                cols: 2
+                spacing: "6dp"
+                size_hint_y: None
+                height: self.minimum_height
+                row_default_height: "42dp"
+                row_force_default: True
 
-        Label:
-            text: "输出尺寸"
-        TextInput:
-            id: output_size
-            text: "1080x1920"
-            multiline: False
-            input_filter: lambda text, from_undo: ''.join(c for c in text if c in '0123456789xX')
+                Label:
+                    text: "渲染算法"
+                Spinner:
+                    id: mode
+                    text: "自动推荐"
+                    values: root.mode_labels
 
-        Label:
-            text: "字体大小"
-        TextInput:
-            id: font_size
-            text: "18"
-            multiline: False
-            input_filter: "int"
+                Label:
+                    text: "图片适配"
+                Spinner:
+                    id: fit
+                    text: "自动"
+                    values: root.fit_labels
 
-        Label:
-            text: "手动背景色"
-        TextInput:
-            id: background
-            text: "black"
-            multiline: False
+                Label:
+                    text: "输出尺寸"
+                TextInput:
+                    id: output_size
+                    text: "1080x1920"
+                    multiline: False
+                    input_filter: lambda text, from_undo: ''.join(c for c in text if c in '0123456789xX')
 
-        Label:
-            text: "自动背景"
-        CheckBox:
-            id: auto_background
-            active: True
+                Label:
+                    text: "字体大小"
+                TextInput:
+                    id: font_size
+                    text: "18"
+                    multiline: False
+                    input_filter: "int"
 
-        Label:
-            text: "误差扩散"
-        CheckBox:
-            id: dither
-            active: False
+                Label:
+                    text: "手动背景色"
+                TextInput:
+                    id: background
+                    text: "black"
+                    multiline: False
 
-    Label:
-        text: root.status
-        text_size: self.width, None
-        halign: "left"
-        valign: "middle"
-        size_hint_y: None
-        height: max(dp(44), self.texture_size[1] + dp(12))
+                Label:
+                    text: "自动背景"
+                CheckBox:
+                    id: auto_background
+                    active: True
+
+                Label:
+                    text: "误差扩散"
+                CheckBox:
+                    id: dither
+                    active: False
+
+            Label:
+                text: root.status
+                text_size: self.width, None
+                halign: "left"
+                valign: "middle"
+                size_hint_y: None
+                height: max(dp(44), self.texture_size[1] + dp(12))
 
     BoxLayout:
         size_hint_y: None
