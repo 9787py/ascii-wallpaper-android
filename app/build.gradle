@@ -1,0 +1,53 @@
+plugins {
+    id 'com.android.application'
+    id 'com.chaquo.python'
+}
+
+android {
+    namespace 'local.personal.asciiwallpaper'
+    compileSdk 36
+    defaultConfig {
+        applicationId 'local.personal.asciiwallpaper'
+        minSdk 26
+        targetSdk 36
+        versionCode 2
+        versionName '0.2.0'
+        ndk { abiFilters 'arm64-v8a' }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+chaquopy {
+    defaultConfig {
+        version = '3.13'
+        def pythonExe = providers.gradleProperty('buildPython').orNull
+        if (pythonExe) { buildPython(pythonExe) }
+        pip { install 'Pillow==11.0.0' }
+    }
+    sourceSets {
+        main {
+            srcDir layout.buildDirectory.dir('generated/python')
+        }
+    }
+}
+
+// Build directly from the desktop sources: no committed copies can go stale.
+def syncRenderer = tasks.register('syncRenderer', Sync) {
+    from(rootProject.file('..')) { include 'img2ascii.py', 'bgmaker.py' }
+    into layout.buildDirectory.dir('generated/python')
+    doFirst {
+        ['img2ascii.py', 'bgmaker.py'].each {
+            if (!rootProject.file('../' + it).isFile()) {
+                throw new GradleException('Missing desktop renderer: ' + it)
+            }
+        }
+    }
+}
+tasks.configureEach {
+    if (name.startsWith('merge') && name.endsWith('PythonSources')) {
+        dependsOn syncRenderer
+    }
+}

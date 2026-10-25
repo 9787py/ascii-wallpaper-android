@@ -5,3 +5,8 @@ cache/
 logs/
 __pycache__/
 *.pyc
+.gradle/
+build/
+app/build/
+local.properties
+.gradle-user-home/
