@@ -76,6 +76,8 @@ python3.13 -m venv .venv
 
 Android Lint：`./build-windows.ps1 -Task lintDebug`。首次构建会获取缺少的依赖；若本机缓存齐全，可用 `-Task @('--offline', 'assembleDebug', 'lintDebug')` 离线构建和检查。
 
+GitHub Actions 的 `Python tests` 工作流在分支推送和向 `main` 提出或更新 PR 时自动运行上述测试，结果可在仓库的 Actions 页面或 PR 检查区域查看。云端使用 Ubuntu、Python 3.13、Pillow 11.0.0 和 DejaVu 等宽字体，覆盖渲染算法及 Python 桥接回归；APK 构建、Android Lint 和真机操作仍需单独验证。
+
 输出暂限制 1600 万像素，输入暂限制 4000 万像素，以降低手机内存峰值；这不是内存使用的绝对保证。建议先从 1080×1920 测试。ASCII 字体依赖设备上的 Roboto Mono / Noto Sans Mono 等字体，特殊字符覆盖需真机确认。当前没有长时后台服务，应用被系统终止时应重新生成；没有自动登记相册或直接分享功能，可用“另存 PNG”保存。
 
 参考：[Chaquopy Gradle 文档](https://chaquo.com/chaquopy/doc/current/android.html)、[Pillow Android wheels](https://chaquo.com/pypi-13.1/pillow/)、[AGP 9.3 兼容表](https://developer.android.com/build/releases/agp-9-3-0-release-notes)。
