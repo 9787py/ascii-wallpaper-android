@@ -76,7 +76,18 @@ python3.13 -m venv .venv
 
 Android Lint：`./build-windows.ps1 -Task lintDebug`。首次构建会获取缺少的依赖；若本机缓存齐全，可用 `-Task @('--offline', 'assembleDebug', 'lintDebug')` 离线构建和检查。
 
-GitHub Actions 的 `Python tests` 工作流在分支推送和向 `main` 提出或更新 PR 时自动运行上述测试，结果可在仓库的 Actions 页面或 PR 检查区域查看。云端使用 Ubuntu、Python 3.13、Pillow 11.0.0 和 DejaVu 等宽字体，覆盖渲染算法及 Python 桥接回归；APK 构建、Android Lint 和真机操作仍需单独验证。
+GitHub Actions 的 `Python tests` 工作流在分支推送和向 `main` 提出或更新 PR 时自动运行上述测试，结果可在仓库的 Actions 页面或 PR 检查区域查看。云端使用 Ubuntu、Python 3.13、Pillow 11.0.0 和 DejaVu 等宽字体，覆盖渲染算法及 Python 桥接回归。
+
+## 云端 APK 构建与下载
+
+`Android APK` 工作流在分支推送、目标为 `main` 的 PR、`v*` 标签推送时执行，也支持从 Actions 页面手动运行。它在 Ubuntu 24.04 上准备 JDK 21、Python 3.13 和 Android SDK 36，使用项目 Gradle Wrapper 执行 `assembleDebug lintDebug`。
+
+- 普通推送、PR 和手动运行：成功后在该次 Actions 运行页的 Artifacts 中下载 `android-debug`，内含 ARM64 调试 APK 和 `SHA256SUMS.txt`，保留14天。
+- 推送 `v*` 标签：构建成功后自动创建预发布 Release 并附上同一份 APK 和校验文件；已有对应 Release 时保留其说明和发布状态，上传附件，同名附件会被替换。发布任务使用 GitHub 自动提供的令牌，不需要自行创建访问令牌。
+
+先将工作流合入 `main`，同步本地后，再为包含工作流的新提交创建并推送新的版本标签。已经推送过的旧标签不会自动重新触发构建。手动运行只生成 Artifacts，不发布 Release。
+
+云端产物是调试签名包，构建间的签名密钥可能变化，安装到已有版本上可能需要先卸载；卸载会清除应用内部数据，需先导出要保留的图片。正式发布应另行配置稳定的签名密钥。云端构建和 Lint 通过仍不能替代真机验收。
 
 输出暂限制 1600 万像素，输入暂限制 4000 万像素，以降低手机内存峰值；这不是内存使用的绝对保证。建议先从 1080×1920 测试。ASCII 字体依赖设备上的 Roboto Mono / Noto Sans Mono 等字体，特殊字符覆盖需真机确认。当前没有长时后台服务，应用被系统终止时应重新生成；没有自动登记相册或直接分享功能，可用“另存 PNG”保存。
 
