@@ -5,9 +5,9 @@ import sys
 import tempfile
 import unittest
 
-ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT))
-sys.path.insert(0, str(ROOT / 'android-try/app/src/main/python'))
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / 'core'))
+sys.path.insert(0, str(ROOT / 'app/src/main/python'))
 from PIL import Image, TiffImagePlugin
 import bgmaker
 import img2ascii

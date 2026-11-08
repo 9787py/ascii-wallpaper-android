@@ -34,14 +34,14 @@ chaquopy {
     }
 }
 
-// Build directly from the desktop sources: no committed copies can go stale.
+// Package the renderer owned by this standalone repository.
 def syncRenderer = tasks.register('syncRenderer', Sync) {
-    from(rootProject.file('..')) { include 'img2ascii.py', 'bgmaker.py' }
+    from(rootProject.file('core')) { include 'img2ascii.py', 'bgmaker.py' }
     into layout.buildDirectory.dir('generated/python')
     doFirst {
         ['img2ascii.py', 'bgmaker.py'].each {
-            if (!rootProject.file('../' + it).isFile()) {
-                throw new GradleException('Missing desktop renderer: ' + it)
+            if (!rootProject.file('core/' + it).isFile()) {
+                throw new GradleException('Missing bundled renderer: core/' + it)
             }
         }
     }

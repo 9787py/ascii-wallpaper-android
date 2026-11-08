@@ -1,6 +1,8 @@
-# Android 个人使用版：Windows 本机构建
+# ASCII Wallpaper Android
 
 Android 端已迁移为原生 Java 界面 + Chaquopy Python/Pillow 渲染。当前构建入口不再使用 Kivy、Buildozer、WSL 或虚拟机，所有图片算法继续可选。
+
+本目录已从 `ascii-wallpapers/android-try` 拆为独立 Git 仓库。渲染模块随 `core/` 一起维护，不需要相邻的桌面项目。拆分历史和代码来源见 [来源记录](SOURCES.md)。
 
 ## 构建环境
 
@@ -8,10 +10,10 @@ Android 端已迁移为原生 Java 界面 + Chaquopy Python/Pillow 渲染。当�
 
 工程版本：AGP 9.3.1、Chaquopy 17.1.0、Python 3.13、Pillow 11.0.0、compileSdk/targetSdk 36、minSdk 26、ARM64。Python 3.13 用于匹配现有 Pillow Android wheel；不会改变全局 Python 默认版本。
 
-在项目根目录运行：
+在本仓库根目录运行：
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\android-try\build-windows.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File .\build-windows.ps1
 ```
 
 脚本从 ADB 路径推断 SDK，通过项目 Gradle Wrapper 固定使用 9.6.0（复用已有分发缓存），使用本机 Python 3.13。可通过 `-SdkPath`、`-GradlePath`、`-PythonPath` 显式传入路径。首次构建会下载缺少的 Maven/Python 依赖；脚本临时设置当前进程的 SDK 路径，结束时恢复，不修改系统环境变量或全局 Python 包。
@@ -19,7 +21,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\android-try\build-windows.
 调试 APK 输出：`app/build/outputs/apk/debug/app-debug.apk`。调试包由本机 Android debug keystore 签名，发布签名尚未配置。
 
 ```powershell
-adb install -r .\android-try\app\build\outputs\apk\debug\app-debug.apk
+adb install -r .\app\build\outputs\apk\debug\app-debug.apk
 ```
 
 ## 源码结构
@@ -31,11 +33,13 @@ adb install -r .\android-try\app\build\outputs\apk\debug\app-debug.apk
 - `app/src/main/AndroidManifest.xml`：应用及壁纸权限。
 - `app/src/main/java/local/personal/asciiwallpaper/MainActivity.java`：中文界面、URI 导入、预览、导出和壁纸设置。
 - `app/src/main/python/android_renderer.py`：Python 桥接和轮转日志。
+- `core/img2ascii.py`、`core/bgmaker.py`：本仓库维护的图像渲染模块。
 - `tests/test_android_renderer.py`：算法桥接、尺寸与元数据回归测试。
+- `tests/test_img2ascii.py`：共享渲染算法回归测试。
 
-Gradle 的 `syncRenderer` 任务每次构建从仓库根目录读取 `img2ascii.py` 和 `bgmaker.py`，复制到生成目录后打包。新工程不依赖 `core/` 副本，也不需要手动同步。请保留整个仓库目录结构。
+Gradle 的 `syncRenderer` 任务每次构建从本仓库 `core/` 读取 `img2ascii.py` 和 `bgmaker.py`，复制到生成目录后打包。构建和测试使用同一份模块，不再读取父目录，也不需要手动同步。
 
-目录根部原先的 Kivy 文件、Buildozer 配置和 `core/` 暂留作历史参考，不参与新的 APK 构建；不要使用旧的 `build_android.sh`。
+目录根部原先的 Kivy 文件和 Buildozer 配置暂留作历史参考，不参与当前 APK 构建；不要用旧的 `build_android.sh` 构建当前原生界面。`sync_core.py` 保留为旧入口兼容检查，仅验证本仓库 `core/` 文件存在，不再覆盖它们。`requirements.txt` 对应旧 Kivy 入口，当前核心测试使用 `requirements-dev.txt`。
 
 ## 功能和存储
 
@@ -54,13 +58,23 @@ Gradle 的 `syncRenderer` 任务每次构建从仓库根目录读取 `img2ascii.
 
 ## 验证边界
 
+2026-11-08 独立仓库验证：Python 3.13 / Pillow 11.0.0 的 15 项算法和桥接回归测试通过；Windows 上离线 `assembleDebug`、`lintDebug` 及 APK 签名校验通过。Lint 为 0 错误、2 个既有警告。构建打包的两份渲染模块与本仓库 `core/` 内容一致。
+
 2026-10-25 已在 Windows 宿主机完成调试 APK 构建、Android Lint 检查及签名验证，并检查包内包含 `android_renderer`、`img2ascii`、`bgmaker` 三个模块。桌面算法 7 项测试和 Android Python 桥接 8 项测试通过，包含原图尺寸、EXIF 方向、无元数据图片、拍摄参数、GPS 与异常数值测试。ARM64 调试 APK 约 22 MiB。
 
-构建成功不代表已完成真机测试。首次安装后需验证 URI 导入、全部算法、中文界面、原图尺寸切换、图片信息展开/收起与文字复制、导出、壁纸目标选择和后台切换。桌面回归测试仍使用根目录 `python -m unittest -v`。
+构建成功不代表已完成真机测试。首次安装后需验证 URI 导入、全部算法、中文界面、原图尺寸切换、图片信息展开/收起与文字复制、导出、壁纸目标选择和后台切换。
 
 APK、构建目录、Gradle 缓存和机器专用的 `local.properties` 均不提交 Git；项目提交包含 Wrapper 所需的 JAR 文件。发布签名密钥也不应加入仓库。
 
-桥接测试：`python -m unittest discover -s android-try/tests -v`（使用已安装 Pillow 的项目虚拟环境）。Android Lint：`./android-try/build-windows.ps1 -Task lintDebug`。
+在本仓库创建独立的测试环境，不需要安装旧 Kivy 依赖：
+
+```powershell
+python3.13 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements-dev.txt
+.\.venv\Scripts\python.exe -m unittest discover -s tests -v
+```
+
+Android Lint：`./build-windows.ps1 -Task lintDebug`。首次构建会获取缺少的依赖；若本机缓存齐全，可用 `-Task @('--offline', 'assembleDebug', 'lintDebug')` 离线构建和检查。
 
 输出暂限制 1600 万像素，输入暂限制 4000 万像素，以降低手机内存峰值；这不是内存使用的绝对保证。建议先从 1080×1920 测试。ASCII 字体依赖设备上的 Roboto Mono / Noto Sans Mono 等字体，特殊字符覆盖需真机确认。当前没有长时后台服务，应用被系统终止时应重新生成；没有自动登记相册或直接分享功能，可用“另存 PNG”保存。
 

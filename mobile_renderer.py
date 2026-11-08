@@ -17,17 +17,15 @@ ANDROID_FONT_CANDIDATES = (
 
 
 def load_core():
-    """Load packaged core first, then the parent checkout during development."""
+    """Load the renderer bundled with this standalone repository."""
     packaged = APP_DIR / "core"
-    checkout = APP_DIR.parent
-    for directory in (packaged, checkout):
-        if (directory / "img2ascii.py").exists():
-            sys.path.insert(0, str(directory))
-            import bgmaker
-            import img2ascii
-            return bgmaker, img2ascii
+    if all((packaged / name).is_file() for name in ("img2ascii.py", "bgmaker.py")):
+        sys.path.insert(0, str(packaged))
+        import bgmaker
+        import img2ascii
+        return bgmaker, img2ascii
     raise RuntimeError(
-        "未找到渲染核心。打包前请运行 python sync_core.py。")
+        "未找到本仓库的 core/img2ascii.py 或 core/bgmaker.py，请检查源码是否完整。")
 
 
 BGMAKER, IMG2ASCII = load_core()

@@ -10,3 +10,15 @@ build/
 app/build/
 local.properties
 .gradle-user-home/
+.venv/
+.venv-*/
+.idea/
+.vscode/
+.codex/
+.agents/
+codex-proxy.ps1
+*.apk
+*.aab
+*.keystore
+*.jks
+*.idsig

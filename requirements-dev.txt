@@ -1,0 +1,2 @@
+# Match the Pillow version packaged by Chaquopy in app/build.gradle.
+Pillow==11.0.0
